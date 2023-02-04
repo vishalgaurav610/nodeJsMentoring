@@ -1,0 +1,26 @@
+{
+  "name": "nodejsmentoring",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "buildTask1": "babel task1.js -d dist",
+    "buildTask2": "babel task2.js -d dist",
+    "task1": "npm run buildTask1 && nodemon task1.js",
+    "task2": "npm run buildTask2 && nodemon task2.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/preset-env": "^7.20.2",
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "csvtojson": "^2.0.10",
+    "fast-csv": "^4.3.6"
+  }
+}
