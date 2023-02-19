@@ -1,9 +1,19 @@
 const express = require('express')
 const bodyParser = require('body-parser');
+const Joi = require('joi');
 
 const PORT = process.env.PORT || 3000;
 
 const Users = [];
+
+const userSchema = Joi.object({
+    id: Joi.string().required(),
+    age: Joi.number().required().min(4).max(130),
+    isDeleted: Joi.boolean().required(),
+    password: Joi.string().required()
+        .pattern(new RegExp('^[a-zA-Z0-9@]{3,30}$')),
+    login: Joi.string().required()
+})
 
 const server = express()
     .use(bodyParser.json())
@@ -41,27 +51,39 @@ server.get('/user/:id', (req, res) => {
 })
 
 // add new user
-server.post('/addNewUser', (req, res) => {
+server.post('/addNewUser', async (req, res) => {
     const newUser = req.body.user;
     let message = "User already exist";
     var userExist = false;
-    Users.forEach((item) => {
-        if (item.id == newUser.id) {
-            userExist = true;
-            return;
+
+    const { error, value } = userSchema.validate(req.body.user, {
+        abortEarly: false,
+    });
+    if (error) {
+        return res.status(400).json(
+            {
+                "Invalid Request: " : JSON.stringify(error)
+            }
+        );
+    } else {
+        Users.forEach((item) => {
+            if (item.id == newUser.id) {
+                userExist = true;
+                return;
+            }
+        })
+        if (!userExist) {
+            Users.push(newUser);
+            message = 'user added';
         }
-    })
-    if (!userExist) {
-        Users.push(newUser);
-        message = 'user added';
+        
+        res.status(200).json(
+            {
+                message: message,
+                user: newUser
+            }
+        )
     }
-    
-    res.status(200).json(
-        {
-            message: message,
-            user: newUser
-        }
-    )
 })
 
 // update user
