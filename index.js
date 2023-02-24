@@ -1,13 +1,14 @@
-const express = require('express')
-const bodyParser = require('body-parser');
-const Joi = require('joi');
+import express from 'express';
+import bodyParser from 'body-parser';
+import Joi from 'joi';
 
-const PORT = process.env.PORT || 3000;
+// const UserServices = require('./services/UserServices.js');
+import { addNewUser, deleteUser, filterUser, retrieveUserDetailById, retrieveUserDetails, updateUser } from './services/UserServices.js';
 
-const Users = [];
+const PORT = process.env.PORT || 3001;
 
 const userSchema = Joi.object({
-    id: Joi.string().required(),
+    // id: Joi.string().required(),
     age: Joi.number().required().min(4).max(130),
     isDeleted: Joi.boolean().required(),
     password: Joi.string().required()
@@ -20,41 +21,36 @@ const server = express()
     
 server.listen(PORT, () => console.log('Server started'));
 
-server.get('/users', (req, res) => {
+server.get('/users', async (req, res) => {
+    const usersDB = await retrieveUserDetails();
     res.status(200).json(
         {
             message: 'users list',
-            users: Users
+            users: usersDB
         }
     )
 })
 
 // get user by ID
-server.get('/user/:id', (req, res) => {
+server.get('/user/:id', async (req, res) => {
     const userId = req.params.id;
-    var message = "User does not exist";
-    var userDetails = {};
-    Users.forEach((item) => {
-        if (item.id == userId) {
-            userDetails = item;
-            message = "User details";
-            return;
-        }
-    })
-    
+    const userDetail = await retrieveUserDetailById(userId);
+    if (userDetail) {
+        message = "User details"; 
+    }
     res.status(200).json(
         {
             message: message,
-            user: userDetails
+            user: userDetail
         }
     )
 })
 
 // add new user
-server.post('/addNewUser', async (req, res) => {
+server.post('/addNewUser',
+  async (req, res, next) => {
     const newUser = req.body.user;
     let message = "User already exist";
-    var userExist = false;
 
     const { error, value } = userSchema.validate(req.body.user, {
         abortEarly: false,
@@ -66,58 +62,42 @@ server.post('/addNewUser', async (req, res) => {
             }
         );
     } else {
-        Users.forEach((item) => {
-            if (item.id == newUser.id) {
-                userExist = true;
-                return;
-            }
-        })
-        if (!userExist) {
-            Users.push(newUser);
-            message = 'user added';
-        }
-        
+        const addUser = await addNewUser(newUser);
         res.status(200).json(
             {
                 message: message,
-                user: newUser
+                user: addUser
             }
         )
     }
-})
+});
 
 // update user
-server.put('/updateUser', (req, res) => {
+server.put('/updateUser',async (req, res) => {
     const newUser = req.body.user;
     let message = "User does not exist";
-    Users.forEach((item, index) => {
-        if (item.id == newUser.id) {
-            Users[index] = newUser;
-            message = 'user updated';
-            return;
-        }
-    })
-    
+
+    const updatedUserDetail = await updateUser(newUser);
+    if (updatedUserDetail) {
+        message = 'user updated';
+    }
     res.status(200).json(
         {
             message: message,
-            user: newUser
+            user: updatedUserDetail
         }
     )
 })
 
 // delete user
-server.put('/deleteUser', (req, res) => {
-    let newUser = req.body.user;
+server.put('/deleteUser/:id',async (req, res) => {
+    let newUser = req.params.id;
     let message = "User does not exist";
-    Users.forEach((item, index) => {
-        if (item.id == newUser.id) {
-            Users[index].isDeleted = true;
-            newUser = Users[index];
-            message = 'user deleted';
-            return;
-        }
-    })
+
+    const deletedUserDetails = await deleteUser(newUser);
+    if (deletedUserDetails) {
+        message = 'user deleted';
+    }
     
     res.status(200).json(
         {
@@ -128,19 +108,11 @@ server.put('/deleteUser', (req, res) => {
 })
 
 //Auto suggestion
-server.get('/user/:loginSubstring/:limit', (req, res) => {
+server.get('/user/:loginSubstring/:limit',async (req, res) => {
     const loginSubstring = req.params.loginSubstring;
     const limit = req.params.limit;
-    var suggestUsers = [];
-    Users.forEach((item) => {
-        if (suggestUsers.length == limit) {
-            return;
-        }
-        if (item.login == loginSubstring) {
-            suggestUsers.push(item)
-        }
-    })
     
+    const suggestUsers = await filterUser(loginSubstring, limit);
     res.status(200).json(
         {
             message: 'User list',
