@@ -1,0 +1,8 @@
+{
+    "dbConfig": {
+        "host": "localhost",
+        "port": 5984,
+        "dbName": "customers",
+        "sequrl": "postgres://uvkkoqgu:0Lw_qf4bFniaJtfAf-SBj_Vm2PaujPAP@isilo.db.elephantsql.com/uvkkoqgu"
+    }
+}

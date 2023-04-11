@@ -1,6 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
-import isAuth from '../middleware/is-auth.js';
+// import isAuth from '../middleware/is-auth.js';
 
 import { addNewGroup, deleteGroup, getAllGroups, getGroupDetailById, updateGroup } from '../services/GroupServices.js';
 
@@ -11,7 +11,7 @@ const groupSchema = Joi.object({
 
 const router = express.Router();
 
-router.get('/getAllGroups', isAuth, async (req, res) => {
+router.get('/getAllGroups', async (req, res) => {
     const allGroups = await getAllGroups();
     res.status(200).json(
         {
@@ -22,7 +22,7 @@ router.get('/getAllGroups', isAuth, async (req, res) => {
 })
 
 // get group by ID
-router.get('/:id', isAuth, async (req, res) => {
+router.get('/:id', async (req, res) => {
     const groupId = req.params.id;
     let message = "Group not found";
     const groupDetail = await getGroupDetailById(groupId);
@@ -38,7 +38,7 @@ router.get('/:id', isAuth, async (req, res) => {
 })
 
 // add new group
-router.post('/addNewGroup', isAuth,
+router.post('/addNewGroup',
   async (req, res, next) => {
     const newGroup = req.body.group;
     let message = "Group already exist";
@@ -64,7 +64,7 @@ router.post('/addNewGroup', isAuth,
 });
 
 // update group
-router.put('/updateGroup', isAuth, async (req, res) => {
+router.put('/updateGroup', async (req, res) => {
     const newGroup = req.body.group;
     let message = "Group does not exist";
 
@@ -81,7 +81,7 @@ router.put('/updateGroup', isAuth, async (req, res) => {
 })
 
 // delete group
-router.put('/deleteGroup/:id', isAuth, async (req, res) => {
+router.put('/deleteGroup/:id', async (req, res) => {
     let groupId = req.params.id;
     let message = "Group does not exist";
 

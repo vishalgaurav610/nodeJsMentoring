@@ -1,4 +1,6 @@
 import { Sequelize, Model, DataTypes } from "sequelize";
+import config from 'config';
+const dbSeqUrl = config.get('dbConfig.sequrl');
 const sequelize = new Sequelize("postgres://uvkkoqgu:0Lw_qf4bFniaJtfAf-SBj_Vm2PaujPAP@isilo.db.elephantsql.com/uvkkoqgu");
 
 const userModal = sequelize.define("users", {

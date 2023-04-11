@@ -5,7 +5,8 @@ import cors from "cors";
 const PORT = process.env.PORT || 3001;
 
 import serviceLogger from "./utils/serviceLogger.js";
-import appLogger from "./utils/appLogger.js"
+import appLogger from "./utils/appLogger.js";
+import authHandler from "./middleware/is-auth.js";
 
 import userRoute from './router/UserRoute.js';
 import groupRoute from './router/GroupRoute.js';
@@ -16,11 +17,12 @@ const corsOptions = {
 
 const server = express()
     .use(bodyParser.json())
-    .use('/user', userRoute)
-    .use('/group', groupRoute)
 
 server.use(cors(corsOptions));
-server.use((serviceLogger));
+server.use(serviceLogger);
+server.use(authHandler)
+server.use('/user', userRoute);
+server.use('/group', groupRoute);
 
 server.use((err, req, res, next) => {
     err.status == 500 && res.status(500).send("Could not perform the operation!");

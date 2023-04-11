@@ -13,6 +13,7 @@ const getGroupDetailById = async (groupId) => {
 const addNewGroup = async (groupDetails) => {
     const group = await GroupModel.create(groupDetails);
     console.log("Added group:", JSON.stringify(group, null, 2));
+    return group;
 }
 
 const updateGroup = async (groupDetail) => {

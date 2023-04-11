@@ -1,6 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
-import isAuth from '../middleware/is-auth.js';
+// import isAuth from '../middleware/is-auth.js';
 import JWT from 'jsonwebtoken';
 
 import {
@@ -36,18 +36,22 @@ router.post('/login', async (req, res) => {
     )
 })
 
-router.get('/getAllUsers', isAuth, async (req, res) => {
-    const usersDB = await retrieveUserDetails();
-    res.status(200).json(
-        {
-            message: 'users list',
-            users: usersDB
-        }
-    )
+router.get('/getAllUsers', async (req, res) => {
+    try {
+        const usersDB = await retrieveUserDetails();
+        res.status(200).json(
+            {
+                message: 'users list',
+                users: usersDB
+            }
+        )
+    } catch (error) {
+        res.status(401).send("Unauthorized");
+    }
 })
 
 // get user by ID
-router.get('/:id', isAuth, async (req, res) => {
+router.get('/:id', async (req, res) => {
     let message = "User not found";
     const userId = req.params.id;
     const userDetail = await retrieveUserDetailById(userId);
@@ -63,10 +67,10 @@ router.get('/:id', isAuth, async (req, res) => {
 })
 
 // add new user
-router.post('/addNewUser', isAuth,
+router.post('/addNewUser',
   async (req, res, next) => {
     const newUser = req.body.user;
-    let message = "User already exist";
+    let message = "User added successfully";
 
     const { error, value } = userSchema.validate(req.body.user, {
         abortEarly: false,
@@ -79,6 +83,9 @@ router.post('/addNewUser', isAuth,
         );
     } else {
         const addUser = await addNewUser(newUser);
+        if (addUser == "user Exist") {
+            message = "User already exist"
+        }
         res.status(200).json(
             {
                 message: message,
@@ -89,7 +96,7 @@ router.post('/addNewUser', isAuth,
 });
 
 // update user
-router.put('/updateUser', isAuth, async (req, res) => {
+router.put('/updateUser', async (req, res) => {
     const newUser = req.body.user;
     let message = "User does not exist";
 
@@ -106,7 +113,7 @@ router.put('/updateUser', isAuth, async (req, res) => {
 })
 
 // delete user
-router.put('/deleteUser/:id', isAuth, async (req, res) => {
+router.put('/deleteUser/:id', async (req, res) => {
     let newUser = req.params.id;
     let message = "User does not exist";
 
@@ -124,7 +131,7 @@ router.put('/deleteUser/:id', isAuth, async (req, res) => {
 })
 
 //Auto suggestion
-router.get('/:loginSubstring/:limit', isAuth, async (req, res) => {
+router.get('/:loginSubstring/:limit', async (req, res) => {
     const loginSubstring = req.params.loginSubstring;
     const limit = req.params.limit;
     

@@ -1,7 +1,7 @@
 import { Sequelize, Model, DataTypes } from "sequelize";
 const sequelize = new Sequelize("postgres://uvkkoqgu:0Lw_qf4bFniaJtfAf-SBj_Vm2PaujPAP@isilo.db.elephantsql.com/uvkkoqgu");
 
-const groupModel = sequelize.define("usergroup", {
+const groupModel = sequelize.define("groups", {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
